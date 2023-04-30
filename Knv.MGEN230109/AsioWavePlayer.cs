@@ -1,32 +1,27 @@
 ﻿
 namespace Knv.MGEN230109
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
     using Knv.MGEN230109.Events;
     using NAudio.Wave;
+    using System;
 
     internal class AsioPlayer : IDisposable
     {
 
         bool _disposed;
-  
+
         WaveStream waveStream;
         AsioOut asioOut;
 
-            
-        public AsioPlayer(string filePath, string sampleRateHz, string asioDriverName, string chName) 
+
+        public AsioPlayer(string filePath, string sampleRateHz, string asioDriverName, string chName)
         {
             int sr = int.Parse(sampleRateHz);
             waveStream = new WaveFileReader(filePath);
             waveStream = new WaveFormatConversionStream(new WaveFormat(sr, waveStream.WaveFormat.Channels), waveStream);
 
             asioOut = new AsioOut(asioDriverName);
-            asioOut.PlaybackStopped += (sender, arg) => 
+            asioOut.PlaybackStopped += (sender, arg) =>
             {
                 EventAggregator.Instance.Publish(new PlayerStatusAppEvent(asioOut.PlaybackState.ToString()));
             };
@@ -35,7 +30,7 @@ namespace Knv.MGEN230109
             {
                 if (asioOut.AsioOutputChannelName(ch) == chName)
                 {
-                    asioOut.ChannelOffset = ch+1;
+                    asioOut.ChannelOffset = ch;
                     break;
                 }
             }
@@ -53,7 +48,7 @@ namespace Knv.MGEN230109
         }
 
         public void Stop()
-        { 
+        {
             asioOut.Stop();
         }
 
@@ -70,7 +65,7 @@ namespace Knv.MGEN230109
 
             if (disposing)
             {
-                if(asioOut != null)
+                if (asioOut != null)
                     asioOut.Dispose();
             }
             _disposed = true;
